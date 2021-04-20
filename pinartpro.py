@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 import os
+import copy
+
 from PIL import Image
 
 DEBUG = True
@@ -29,12 +31,31 @@ def detect_edges(image_path):
     # Output RGB values for debugging purposes
     if DEBUG:
         with open(f'{script_dir}/tmp/rgb_vals.txt', 'w+') as output_fp:
+            debug_output = copy.deepcopy(output_rgb)
+
+            # Search for maximum RGB value. Greyscale so RGB are all equal
+            max_magnitude = 0
+            for row_i in range(0, 50):
+                for col_i in range(0, 50):
+                    curr_magnitude = debug_output.getpixel((row_i, col_i))[0]
+                    if curr_magnitude > max_magnitude:
+                        max_magnitude = curr_magnitude
+            
+            # Modify pixels to some stronger white value based on max magnitude
+            for row_i in range(0, 50):
+                for col_i in range(0, 50):
+                    curr_magnitude = debug_output.getpixel((row_i, col_i))[0]
+                    scaled_mag = int((curr_magnitude / max_magnitude) * 255)
+                    debug_output.putpixel((row_i, col_i), (scaled_mag, scaled_mag, scaled_mag))
+
+            debug_output.save(f'{script_dir}/tmp/resized.png')
+
             for row_i in range(0, 50):
                 for col_i in range(0, 50):
                     output_fp.write(str(output_rgb.getpixel((row_i, col_i))) + " ")
                 
                 output_fp.write("\n")
-
+            
     return output_rgb
 
 def output_motor_data(rgb_data):
