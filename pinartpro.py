@@ -6,6 +6,8 @@ import copy
 from PIL import Image
 
 DEBUG = True
+IMAGE_WIDTH = 12
+IMAGE_HEIGHT = 16
 
 def detect_edges(image_path):
     # Image setup
@@ -25,7 +27,7 @@ def detect_edges(image_path):
 
     cv2.imwrite(f"{script_dir}/tmp/pic.png", laplacian)
     with Image.open(f"{script_dir}/tmp/pic.png") as orig_output:
-        output = orig_output.resize((50, 50))
+        output = orig_output.resize((IMAGE_WIDTH, IMAGE_HEIGHT))
         output_rgb = output.convert("RGB")
 
     # Output RGB values for debugging purposes
@@ -35,23 +37,23 @@ def detect_edges(image_path):
 
             # Search for maximum RGB value. Greyscale so RGB are all equal
             max_magnitude = 0
-            for row_i in range(0, 50):
-                for col_i in range(0, 50):
+            for row_i in range(0, IMAGE_WIDTH):
+                for col_i in range(0, IMAGE_HEIGHT):
                     curr_magnitude = debug_output.getpixel((row_i, col_i))[0]
                     if curr_magnitude > max_magnitude:
                         max_magnitude = curr_magnitude
             
             # Modify pixels to some stronger white value based on max magnitude
-            for row_i in range(0, 50):
-                for col_i in range(0, 50):
+            for row_i in range(0, IMAGE_WIDTH):
+                for col_i in range(0, IMAGE_HEIGHT):
                     curr_magnitude = debug_output.getpixel((row_i, col_i))[0]
                     scaled_mag = int((curr_magnitude / max_magnitude) * 255)
                     debug_output.putpixel((row_i, col_i), (scaled_mag, scaled_mag, scaled_mag))
 
             debug_output.save(f'{script_dir}/tmp/resized.png')
 
-            for row_i in range(0, 50):
-                for col_i in range(0, 50):
+            for row_i in range(0, IMAGE_WIDTH):
+                for col_i in range(0, IMAGE_HEIGHT):
                     output_fp.write(str(output_rgb.getpixel((row_i, col_i))) + " ")
                 
                 output_fp.write("\n")
@@ -61,8 +63,8 @@ def detect_edges(image_path):
 def output_motor_data(rgb_data):
     # Search for maximum RGB value. Greyscale so RGB are all equal
     max_magnitude = 0
-    for row_i in range(0, 50):
-        for col_i in range(0, 50):
+    for row_i in range(0, IMAGE_WIDTH):
+        for col_i in range(0, IMAGE_HEIGHT):
             curr_magnitude = rgb_data.getpixel((row_i, col_i))[0]
             if curr_magnitude > max_magnitude:
                 max_magnitude = curr_magnitude
@@ -70,8 +72,8 @@ def output_motor_data(rgb_data):
 
     # Write each pixel's magnitude as a percentage of the maximum magnitude as binary data
     mag_array = []
-    for row_i in range(0, 50):
-        for col_i in range(0, 50):
+    for row_i in range(0, IMAGE_WIDTH):
+        for col_i in range(0, IMAGE_HEIGHT):
             rgb_magnitude = rgb_data.getpixel((row_i, col_i))[0]
             percentage = int(float(rgb_magnitude) * 100.0 / float(max_magnitude))
             mag_array.append(percentage)
